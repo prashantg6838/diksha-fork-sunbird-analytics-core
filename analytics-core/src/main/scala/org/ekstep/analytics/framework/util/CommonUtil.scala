@@ -731,6 +731,7 @@ object CommonUtil {
     connProperties.setProperty("ssl", "true")
     connProperties.setProperty("sslmode", "require")
     connProperties.setProperty("sslfactory", "org.postgresql.ssl.NonValidatingFactory") 
+    connProperties
   }
 
   def getS3File(bucket: String, file: String): String = {
