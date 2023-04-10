@@ -728,8 +728,9 @@ object CommonUtil {
     connProperties.setProperty("driver", "org.postgresql.Driver")
     connProperties.setProperty("user", user)
     connProperties.setProperty("password", pass)
-    connProperties
-  }
+    connProperties.setProperty("ssl", "true")
+    connProperties.setProperty("sslmode", "require")
+    connProperties.setProperty("sslfactory", "org.postgresql.ssl.NonValidatingFactory")  }
 
   def getS3File(bucket: String, file: String): String = {
     "s3n://" + bucket + "/" + file;
