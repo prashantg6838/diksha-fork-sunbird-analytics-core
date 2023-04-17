@@ -92,6 +92,7 @@ object CommonUtil {
 
     val sc = new SparkContext(conf)
     setS3Conf(sc)
+    setOCIConf(sc)
     setAzureConf(sc)
     setGcloudConf(sc)
     JobLogger.log("Spark Context initialized")
@@ -162,6 +163,12 @@ object CommonUtil {
     }
   }
 
+  def setOCIConf(sc: SparkContext) = {
+    JobLogger.log("Configuring OCI HDFS to SparkContext")
+    sc.hadoopConfiguration.set("fs.oci.client.custom.authenticator", "com.oracle.bmc.hdfs.auth.InstancePrincipalsCustomAuthenticator");
+    sc.hadoopConfiguration.set("fs.oci.client.hostname", AppConf.getConfig("oci_object_storage_endpoint"));
+
+  }
   def setAzureConf(sc: SparkContext) = {
     val accName = AppConf.getStorageKey("azure")
     val accKey = AppConf.getStorageSecret("azure")
@@ -734,6 +741,10 @@ object CommonUtil {
   def getS3File(bucket: String, file: String): String = {
     "s3n://" + bucket + "/" + file;
   }
+
+  def getOCIFile(bucket: String, file: String): String = {
+    "oci://"+ bucket + "@" + AppConf.getConfig("oci.namespace")+"/"+file;
+  }
   
   def getS3FileWithoutPrefix(bucket: String, file: String): String = {
     bucket + "/" + file;
@@ -770,9 +781,8 @@ object CommonUtil {
         sc.hadoopConfiguration.set("fs.gs.auth.service.account.private.key", AppConf.getStorageSecret("gcloud"))
         sc.hadoopConfiguration.set("fs.gs.auth.service.account.private.key.id", AppConf.getConfig("gcloud_private_secret_id"))
       case "oci" =>
-        sc.hadoopConfiguration.set("fs.s3n.awsAccessKeyId", AppConf.getConfig(accountKey.getOrElse("aws_storage_key")));
-        sc.hadoopConfiguration.set("fs.s3n.awsSecretAccessKey", AppConf.getConfig(accountSecret.getOrElse("aws_storage_secret")));
-        sc.hadoopConfiguration.set("fs.s3n.endpoint", AppConf.getConfig(accountSecret.getOrElse("cloud_storage_endpoint_with_protocol")));
+        sc.hadoopConfiguration.set("fs.oci.client.custom.authenticator", "com.oracle.bmc.hdfs.auth.InstancePrincipalsCustomAuthenticator");
+        sc.hadoopConfiguration.set("fs.oci.client.hostname", AppConf.getConfig("oci_object_storage_endpoint"));
       case _ =>
       // Do nothing
     }
@@ -796,7 +806,7 @@ object CommonUtil {
       case "s3" =>
         getS3File(bucket, filePath)
       case "oci" =>
-        getS3File(bucket, filePath)
+        getOCIFile(bucket, filePath)
       // $COVERAGE-OFF$ for azure testing
       case "gcp" =>
         //TODO - Need to support the GCP As well.
