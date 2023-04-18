@@ -750,6 +750,10 @@ object CommonUtil {
     bucket + "/" + file;
   }
 
+  def getOCIFileWithoutPrefix(bucket: String, file: String): String = {
+    bucket + "@" + AppConf.getConfig("oci.namespace") + "/" + file;
+  }
+
   def getAzureFile(bucket: String, file: String, storageKey: String = "azure_storage_key"): String = {
     "wasb://" + bucket + "@" + AppConf.getConfig(storageKey) + ".blob.core.windows.net/" + file;
   }
