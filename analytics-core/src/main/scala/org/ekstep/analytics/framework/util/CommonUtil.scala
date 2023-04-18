@@ -751,7 +751,7 @@ object CommonUtil {
   }
 
   def getOCIFileWithoutPrefix(bucket: String, file: String): String = {
-    bucket + "@" + AppConf.getConfig("oci.namespace") + "/" + file;
+    bucket + "@bmzbbujw9kal/" + file;
   }
 
   def getAzureFile(bucket: String, file: String, storageKey: String = "azure_storage_key"): String = {
