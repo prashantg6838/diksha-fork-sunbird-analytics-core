@@ -38,9 +38,6 @@ object BatchJobDriver {
             val frameworkContext = if (fc.isEmpty) {
                 val storageKey = config.modelParams.getOrElse(Map()).getOrElse("storageKeyConfig", "azure_storage_key").asInstanceOf[String]
                 val storageSecret = config.modelParams.getOrElse(Map()).getOrElse("storageSecretConfig", "azure_storage_secret").asInstanceOf[String]
-                print("BatchJobDriver modelParam: " + config.modelParams);
-                print("For BatchJobDriver storageKeyConfig: " + storageKey);
-                print("For BatchJobDriver storageSecretConfig: " + storageSecret);
                 CommonUtil.getFrameworkContext(Option(Array((AppConf.getConfig("cloud_storage_type"), storageKey, storageSecret))));
             } else {
                 fc.get
@@ -69,6 +66,7 @@ object BatchJobDriver {
         models.foreach { model =>
             // TODO: It is not necessary that the end date always exists. The below log statement might throw exceptions
             // $COVERAGE-OFF$
+            print("BatchJobDriver --> modelParams :"+config.modelParams);
             fc.outputEventsCount.reset();
             val endDate = config.search.queries.getOrElse(Array(Query())).last.endDate
             // $COVERAGE-ON$
