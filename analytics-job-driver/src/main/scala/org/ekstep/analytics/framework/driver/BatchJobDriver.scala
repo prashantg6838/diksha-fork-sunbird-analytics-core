@@ -38,6 +38,9 @@ object BatchJobDriver {
             val frameworkContext = if (fc.isEmpty) {
                 val storageKey = config.modelParams.getOrElse(Map()).getOrElse("storageKeyConfig", "azure_storage_key").asInstanceOf[String]
                 val storageSecret = config.modelParams.getOrElse(Map()).getOrElse("storageSecretConfig", "azure_storage_secret").asInstanceOf[String]
+                print("BatchJobDriver modelParam: " + config.modelParams);
+                print("For BatchJobDriver storageKeyConfig: " + storageKey);
+                print("For BatchJobDriver storageSecretConfig: " + storageSecret);
                 CommonUtil.getFrameworkContext(Option(Array((AppConf.getConfig("cloud_storage_type"), storageKey, storageSecret))));
             } else {
                 fc.get
