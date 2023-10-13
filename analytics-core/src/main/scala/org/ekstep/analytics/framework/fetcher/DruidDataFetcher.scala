@@ -283,9 +283,9 @@ object DruidDataFetcher {
     val finalResult = JSONUtils.deserialize[Map[String,Any]](result)
     val finalMap  =finalResult.map(m => {
       if(m._2== null)
-        (m._1, "unknown")
+        (m._1, " ")
       else if (m._2.isInstanceOf[String])
-        (m._1, if(m._2.toString.isEmpty) "unknown" else m._2)
+        (m._1, if(m._2.toString.isEmpty) " " else m._2)
       else (m._1,m._2)})
     DruidOutput(finalMap)
   }
