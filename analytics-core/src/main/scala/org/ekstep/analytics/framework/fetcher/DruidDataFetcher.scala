@@ -206,7 +206,7 @@ object DruidDataFetcher {
         JSONUtils.serialize(result.asInstanceOf[DruidResult].result.asObject.get.+:("date",
           Json.fromString(result.timestamp.get.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))).toMap.map { f =>
           if (f._2.isNull)
-            f._1 -> "unknown"
+            f._1 -> " "
           else if ("String".equalsIgnoreCase(f._2.name))
             f._1 -> f._2.asString.get
           else if ("Number".equalsIgnoreCase(f._2.name)) {
@@ -218,7 +218,7 @@ object DruidDataFetcher {
         val test = result.asInstanceOf[DruidResult].result.asArray.get.map(data => {
           JSONUtils.serialize(timeMap ++ data.asObject.get.toMap.map({ f =>
             if (f._2.isNull)
-              f._1 -> "unknown"
+              f._1 -> " "
             else if ("String".equalsIgnoreCase(f._2.name))
               f._1 -> f._2.asString.get
             else if ("Number".equalsIgnoreCase(f._2.name)) {
@@ -232,7 +232,7 @@ object DruidDataFetcher {
         JSONUtils.serialize(result.asInstanceOf[DruidScanResult].result.asObject.get.+:("date", Json.fromString(result.
           timestamp.get.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))).toMap.map { f =>
           if (f._2.isNull)
-            f._1 -> "unknown"
+            f._1 -> " "
           else if ("String".equalsIgnoreCase(f._2.name))
             f._1 -> f._2.asString.get
           else if ("Number".equalsIgnoreCase(f._2.name)) {
