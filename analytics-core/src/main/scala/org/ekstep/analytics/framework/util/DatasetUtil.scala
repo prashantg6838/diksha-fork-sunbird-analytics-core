@@ -87,12 +87,13 @@ class DatasetExt(df: Dataset[Row]) {
         df.repartition(1).select(headersList.head, headersList.tail: _*).write.format(format).options(opts).save(filePrefix + tempDir)
       }
       else {
-        println(s"fileprefix = $filePrefix  tempDir=$tempDir format=$format")
+       /* println(s"fileprefix = $filePrefix  tempDir=$tempDir format=$format")
         println(opts.mapValues(_.toList))
         opts.foreach { case (key, values) => println("key " + key + " - " + values.mkString("-"))}
         println(df.printSchema())
-        println(df.show(10))
-        df.repartition(1).write.format(format).options(opts).save(filePrefix + tempDir)
+        println(df.show(10)) */
+        //df.repartition(1).write.format(format).options(opts).save(filePrefix + tempDir)
+        df.coalesce(1).write.format(format).options(opts).save(filePrefix + tempDir)
       }
      // fileUtil.delete(conf, filePrefix + finalDir + "." + fileExt.getOrElse(format))
       fileUtil.copyMerge(filePrefix + tempDir, filePrefix + finalDir + "." + fileExt.getOrElse(format), conf, true);
