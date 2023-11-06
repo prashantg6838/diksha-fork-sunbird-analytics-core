@@ -92,8 +92,8 @@ class DatasetExt(df: Dataset[Row]) {
         opts.foreach { case (key, values) => println("key " + key + " - " + values.mkString("-"))}
         println(df.printSchema())
         println(df.show(10)) */
-        //df.repartition(1).write.format(format).options(opts).save(filePrefix + tempDir)
-        df.coalesce(1).write.format(format).options(opts).save(filePrefix + tempDir)
+        df.repartition(10).coalesce(1).write.format(format).options(opts).save(filePrefix + tempDir)
+        //df.coalesce(1).write.format(format).options(opts).save(filePrefix + tempDir)
       }
      // fileUtil.delete(conf, filePrefix + finalDir + "." + fileExt.getOrElse(format))
       fileUtil.copyMerge(filePrefix + tempDir, filePrefix + finalDir + "." + fileExt.getOrElse(format), conf, true);
