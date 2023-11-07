@@ -96,7 +96,7 @@ class DatasetExt(df: Dataset[Row]) {
         //df.coalesce(1).write.format(format).options(opts).save(filePrefix + tempDir)
         df.repartition(20).write.format(format).options(opts).save(filePrefix + tempDir)
       }
-     // fileUtil.delete(conf, filePrefix + finalDir + "." + fileExt.getOrElse(format))
+      fileUtil.delete(conf, filePrefix + finalDir + "." + fileExt.getOrElse(format))
       fileUtil.copyMerge(filePrefix + tempDir, filePrefix + finalDir + "." + fileExt.getOrElse(format), conf, true);
       List(filePrefix + finalDir + "." + fileExt.getOrElse(format))
     }
