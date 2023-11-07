@@ -45,7 +45,7 @@ class HadoopFileUtil {
 
     val srcFilePath = new Path(srcPath);
     val destFilePath = new Path(destPath);
-    copyMerge2(srcFilePath.getFileSystem(conf), srcFilePath, destFilePath.getFileSystem(conf), destFilePath, deleteSrc, conf)
+    copyMerge(srcFilePath.getFileSystem(conf), srcFilePath, destFilePath.getFileSystem(conf), destFilePath, deleteSrc, conf)
   }
 
   def copyMerge(srcFS: FileSystem, srcDir: Path, dstFS: FileSystem, dstFile: Path,
@@ -63,23 +63,6 @@ class HadoopFileUtil {
           }
       }
       outputFile.close()
-      if (deleteSource) srcFS.delete(srcDir, true) else true
-    } else false
-  }
-
-  def copyMerge2(srcFS: FileSystem, srcDir: Path, dstFS: FileSystem, dstFile: Path,
-                deleteSource: Boolean, conf: Configuration): Boolean = {
-     println(s"source path ${srcDir.getName} destination path = ${dstFile.getName}")
-    if (srcFS.exists(srcDir) && srcFS.getFileStatus(srcDir).isDirectory) {
-     FileUtil.copyMerge(
-       srcFS,
-       new org.apache.hadoop.fs.Path(srcDir.getName),
-       dstFS,
-       new org.apache.hadoop.fs.Path(dstFile.getName),
-       false,
-       conf,
-       null
-     )
       if (deleteSource) srcFS.delete(srcDir, true) else true
     } else false
   }
