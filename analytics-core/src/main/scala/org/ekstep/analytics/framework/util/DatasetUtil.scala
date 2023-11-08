@@ -95,7 +95,7 @@ class DatasetExt(df: Dataset[Row]) {
         println(df.show(10)) */
        val dfSize = SizeEstimator.estimate(df)
         println(s"Estimated size of the dataFrame someDF = ${dfSize/1000000} mb")
-        if (${dfSize/1000000} > 2000){
+        if ({dfSize/1000000} > 2000){
           df.repartition(5).write.format(format).options(opts).save(filePrefix + tempDir)
         }
         else{
