@@ -104,6 +104,8 @@ class DatasetExt(df: Dataset[Row]) {
        val dfSize = SizeEstimator.estimate(df)
         println(s"Estimated size of the dataFrame someDF = ${dfSize/1000000} mb $dfSize")
         println(s"TempDir ==  $tempDir2")
+        df.printSchema()
+        df.show(5)
 
         df.repartition(4).write.format(format).options(opts).save(filePrefix + tempDir2)
 
