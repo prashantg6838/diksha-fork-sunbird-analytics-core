@@ -20,6 +20,10 @@ class DatasetExt(df: Dataset[Row]) {
     Paths.get(filePrefix, reportId, "/_tmp/").toString()
   }
 
+  private def getTempDir2(filePrefix: String, reportId: String): String = {
+    Paths.get(filePrefix, reportId, "/_tmp1/").toString()
+  }
+
   private def getFinalDir(filePrefix: String, reportId: String): String = {
     Paths.get(filePrefix, reportId).toString();
   }
@@ -74,7 +78,7 @@ class DatasetExt(df: Dataset[Row]) {
 
     val tempDir = getTempDir(file, reportId);
     val finalDir = getFinalDir(file, reportId);
-    val tempDir2 = getTempDir(filePrefix, reportId+"123")
+    val tempDir2 = getTempDir2(filePrefix, reportId)
 
     val dims = partitioningColumns.getOrElse(Seq())
     var headersList = columnOrder.getOrElse(List())
