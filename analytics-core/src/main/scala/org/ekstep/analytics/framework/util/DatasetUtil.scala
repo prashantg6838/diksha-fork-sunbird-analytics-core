@@ -98,23 +98,20 @@ class DatasetExt(df: Dataset[Row]) {
         println(df.printSchema())
         println(df.show(10)) */
        val dfSize = SizeEstimator.estimate(df)
-        println(s"Estimated size of the dataFrame someDF = ${dfSize/1000000} mb")
-        if ((dfSize/1000000) > 2000){
-
+        println(s"Estimated size of the dataFrame someDF = ${dfSize/1000000} mb $dfSize")
           df.repartition(4).write.format(format).options(opts).save(filePrefix + tempDir2)
 
-          val paritionDf = df.sparkSession.read.option("header", true).csv(filePrefix + tempDir2)
+        val partitionDf = df.sparkSession.read.option("header", true).csv(filePrefix + tempDir2)
 
-          paritionDf.coalesce(1)
+         println(s"spark read the data from path = ${filePrefix + tempDir2}")
+
+        partitionDf.show()
+
+        partitionDf.repartition(1)
             .write.format(format)
             .options(opts)
             .save(filePrefix + tempDir)
-        }
-        else{
-          df.repartition(1).write.format(format).options(opts).save(filePrefix + tempDir)
-        }
         //df.coalesce(1).write.format(format).options(opts).save(filePrefix + tempDir)
-
       }
       fileUtil.delete(conf, filePrefix + finalDir + "." + fileExt.getOrElse(format))
       fileUtil.copyMerge(filePrefix + tempDir, filePrefix + finalDir + "." + fileExt.getOrElse(format), conf, true);
