@@ -2,7 +2,7 @@ package org.ekstep.analytics.framework.util
 
 import net.lingala.zip4j.ZipFile
 import org.apache.spark.sql.functions.col
-import org.apache.spark.sql.{Dataset, Row}
+import org.apache.spark.sql.{Dataset, Row, SparkSession}
 import org.ekstep.analytics.framework.StorageConfig
 import org.sunbird.cloud.storage.BaseStorageService
 import org.apache.hadoop.conf.Configuration
@@ -38,8 +38,11 @@ class DatasetExt(df: Dataset[Row]) {
   }
 
   def saveToBlobStore(storageConfig: StorageConfig, format: String, reportId: String, options: Option[Map[String, String]],
-                      partitioningColumns: Option[Seq[String]], storageService: Option[BaseStorageService] = None,
-                      zip: Option[Boolean] = Option(false), columnOrder: Option[List[String]] = Option(List()), fileExt:Option[String] = None): List[String] = {
+                      partitioningColumns: Option[Seq[String]],
+                      storageService: Option[BaseStorageService] = None,
+                      zip: Option[Boolean] = Option(false),
+                      columnOrder: Option[List[String]] = Option(List()),
+                      fileExt:Option[String] = None): List[String] = {
 
     val conf = df.sparkSession.sparkContext.hadoopConfiguration;
 
@@ -71,6 +74,7 @@ class DatasetExt(df: Dataset[Row]) {
 
     val tempDir = getTempDir(file, reportId);
     val finalDir = getFinalDir(file, reportId);
+    val tempDir2 = getTempDir(filePrefix, reportId+"123")
 
     val dims = partitioningColumns.getOrElse(Seq())
     var headersList = columnOrder.getOrElse(List())
@@ -96,7 +100,15 @@ class DatasetExt(df: Dataset[Row]) {
        val dfSize = SizeEstimator.estimate(df)
         println(s"Estimated size of the dataFrame someDF = ${dfSize/1000000} mb")
         if ((dfSize/1000000) > 2000){
-          df.repartition(5).write.format(format).options(opts).save(filePrefix + tempDir)
+
+          df.repartition(4).write.format(format).options(opts).save(filePrefix + tempDir2)
+
+          val paritionDf = df.sparkSession.read.option("header", true).csv(filePrefix + tempDir2)
+
+          paritionDf.coalesce(1)
+            .write.format(format)
+            .options(opts)
+            .save(filePrefix + tempDir)
         }
         else{
           df.repartition(1).write.format(format).options(opts).save(filePrefix + tempDir)
