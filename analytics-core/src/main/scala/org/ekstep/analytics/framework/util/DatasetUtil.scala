@@ -78,7 +78,7 @@ class DatasetExt(df: Dataset[Row]) {
 
     val tempDir = getTempDir(file, reportId);
     val finalDir = getFinalDir(file, reportId);
-    val tempDir2 = getTempDir2(filePrefix, reportId)
+    val tempDir2 = getTempDir2(file, reportId)
 
     val dims = partitioningColumns.getOrElse(Seq())
     var headersList = columnOrder.getOrElse(List())
@@ -103,7 +103,9 @@ class DatasetExt(df: Dataset[Row]) {
         println(df.show(10)) */
        val dfSize = SizeEstimator.estimate(df)
         println(s"Estimated size of the dataFrame someDF = ${dfSize/1000000} mb $dfSize")
-          df.repartition(4).write.format(format).options(opts).save(filePrefix + tempDir2)
+        println(s"TempDir ==  $tempDir2")
+
+        df.repartition(4).write.format(format).options(opts).save(filePrefix + tempDir2)
 
         val partitionDf = df.sparkSession.read.option("header", true).csv(filePrefix + tempDir2)
 
