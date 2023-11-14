@@ -50,19 +50,24 @@ class HadoopFileUtil {
 
   def copyMerge(srcFS: FileSystem, srcDir: Path, dstFS: FileSystem, dstFile: Path,
                 deleteSource: Boolean, conf: Configuration): Boolean = {
-
+    import scala.util._
     if (srcFS.exists(srcDir) && srcFS.getFileStatus(srcDir).isDirectory) {
-      val outputFile = dstFS.create(dstFile)
       Try {
+        val outputFile = dstFS.create(dstFile)
         srcFS.listStatus(srcDir).sortBy(_.getPath.getName)
           .collect {
             case status if status.isFile() =>
+              println(s"copying file to path :${status.getPath}")
               val inputFile = srcFS.open(status.getPath())
               Try(IOUtils.copyBytes(inputFile, outputFile, conf, false))
               inputFile.close()
           }
+        outputFile.close()
+      } match {
+        case Success(value) => println(s"successfully upload file to bucket $value")
+        case Failure(exception)=> exception.printStackTrace()
       }
-      outputFile.close()
+
       if (deleteSource) srcFS.delete(srcDir, true) else true
     } else false
   }
