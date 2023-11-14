@@ -155,7 +155,7 @@ object CommonUtil {
     JobLogger.log("Configuring S3 AccessKey& SecrateKey to SparkContext")
     sc.hadoopConfiguration.set("fs.s3n.awsAccessKeyId", AppConf.getAwsKey());
     sc.hadoopConfiguration.set("fs.s3n.awsSecretAccessKey", AppConf.getAwsSecret());
-    sc.hadoopConfiguration.set("com.amazonaws.sdk.s3.defaultStreamBufferSize","3072m")
+    sc.hadoopConfiguration.set("com.amazonaws.sdk.s3n.defaultStreamBufferSize","2048m")
 
     val storageEndpoint = AppConf.getConfig("cloud_storage_endpoint")
     if (!"".equalsIgnoreCase(storageEndpoint)) {
