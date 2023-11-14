@@ -87,7 +87,7 @@ class DatasetExt(df: Dataset[Row]) {
         df.repartition(1).select(headersList.head, headersList.tail: _*).write.format(format).options(opts).save(filePrefix + tempDir)
       }
       else {
-        df.repartition(10).write.format(format).options(opts).save(filePrefix + tempDir)
+        df.repartition(1).write.format(format).options(opts).save(filePrefix + tempDir)
       }
       fileUtil.delete(conf, filePrefix + finalDir + "." + fileExt.getOrElse(format))
       fileUtil.copyMerge(filePrefix + tempDir, filePrefix + finalDir + "." + fileExt.getOrElse(format), conf, true);
