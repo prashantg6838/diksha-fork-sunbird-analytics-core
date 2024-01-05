@@ -52,23 +52,15 @@ class HadoopFileUtil {
                 deleteSource: Boolean, conf: Configuration): Boolean = {
     if (srcFS.exists(srcDir) && srcFS.getFileStatus(srcDir).isDirectory) {
       val outputFile = dstFS.create(dstFile)
-      var headerInclude = true
       Try {
         srcFS.listStatus(srcDir).sortBy(_.getPath.getName)
           .collect {
-            case status if status.isFile() && status.getPath.getName.takeRight(4).equals(".csv")=>
+            case status if status.isFile() =>
               println(s"copying file to path :${status.getPath}")
               val inputFile = srcFS.open(status.getPath())
-              if(headerInclude){
                 Try(IOUtils.copyBytes(inputFile, outputFile, conf, false))
                 inputFile.close()
-                headerInclude = false
-              }else {
-                inputFile.readLine()
-                Try(IOUtils.copyBytes(inputFile, outputFile, conf, false))
-                inputFile.close()
-              }
-          }
+                   }
       }
       outputFile.close()
       if (deleteSource) srcFS.delete(srcDir, true) else true
