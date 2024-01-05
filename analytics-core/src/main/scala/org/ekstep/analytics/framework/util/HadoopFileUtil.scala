@@ -58,9 +58,9 @@ class HadoopFileUtil {
             case status if status.isFile() =>
               println(s"copying file to path :${status.getPath}")
               val inputFile = srcFS.open(status.getPath())
-                Try(IOUtils.copyBytes(inputFile, outputFile, conf, false))
-                inputFile.close()
-                   }
+              Try(IOUtils.copyBytes(inputFile, outputFile, conf, false))
+              inputFile.close()
+          }
       }
       outputFile.close()
       if (deleteSource) srcFS.delete(srcDir, true) else true
