@@ -39,9 +39,13 @@ object AkkaHttpUtil extends AkkaHttpClient {
 object DruidDataFetcher {
   @throws(classOf[DataFetcherException])
   def getDruidData(query: DruidQueryModel, queryAsStream: Boolean = false)(implicit sc: SparkContext, fc: FrameworkContext): RDD[String] = {
+    println("-------------getDruidData----------------")
+    println(s"query = $query")
     val request = getDruidQuery(query)
+    println(s"request = $request")
     fc.inputEventsCount = sc.longAccumulator("DruidDataCount")
     if (queryAsStream) {
+      println("---------inside the queryAsStream if condition--------")
       query.queryType.toLowerCase() match {
         case "topn" =>
           executeQueryAsStream(query, request).flatMap(f => processResult(query, f).asInstanceOf[List[String]])
@@ -49,6 +53,7 @@ object DruidDataFetcher {
           executeQueryAsStream(query, request).map(f => processResult(query, f).toString)
       }
     } else {
+      println("---------inside the queryAsStream else condition---------")
       val response = executeDruidQuery(query, request)
       query.queryType.toLowerCase() match {
         case "timeseries" | "groupby" =>
@@ -65,12 +70,14 @@ object DruidDataFetcher {
   }
 
   def getDruidQuery(query: DruidQueryModel): DruidNativeQuery = {
+    println(s"-------inside getDruidQuery model-----------")
     val dims = query.dimensions.getOrElse(List())
     val druidQuery = DQL
       .from(query.dataSource)
       .granularity(CommonUtil.getGranularity(query.granularity.getOrElse("all")))
       .interval(getIntervals(query))
     query.queryType.toLowerCase() match {
+      println(s"druidQuery = $druidQuery")
       case "groupby" =>
         val DQLQuery = druidQuery.agg(getAggregation(query.aggregations): _*)
           .groupBy(dims.map(f => getDimensionByType(f.`type`, f.fieldName, f.aliasName, f.outputType, f.extractionFn)): _*)
@@ -134,9 +141,12 @@ object DruidDataFetcher {
   }
 
   def executeDruidQuery(model: DruidQueryModel, query: DruidNativeQuery)(implicit sc: SparkContext, fc: FrameworkContext): DruidResponse = {
+    println(s"------------executeDruidQuery in sunbird analytics core----------------")
+    println(s"Query = $query")
     val response = if (query.dataSource.contains("rollup") || query.dataSource.contains("distinct")
       || query.dataSource.contains("snapshot")) fc.getDruidRollUpClient().doQuery(query)
     else fc.getDruidClient().doQuery(query)
+    println(s"response = $response")
     val queryWaitTimeInMins = AppConf.getConfig("druid.query.wait.time.mins").toLong
     Await.result(response, scala.concurrent.duration.Duration.apply(queryWaitTimeInMins, "minute"))
 
@@ -166,20 +176,25 @@ object DruidDataFetcher {
     }
   }
 
+  import io.circe.syntax._
   def executeQueryAsStream(model: DruidQueryModel, query: DruidNativeQuery)(implicit sc: SparkContext, fc: FrameworkContext): RDD[BaseResult] = {
-
+    println(s"-----------inside the executeQueryAsStream -------------")
     implicit val system = if (query.dataSource.contains("rollup") || query.dataSource.contains("distinct") || query.dataSource.contains("snapshot"))
       fc.getDruidRollUpClient().actorSystem
     else
       fc.getDruidClient().actorSystem
+    println(s"system = $system")
     implicit val materializer = ActorMaterializer()
-
+    val queryJson = query.asJson.noSpaces
+    println("\n\n\n\n\n\n================================")
+    println(s"queryJson = $queryJson")
+    println("\n\n\n\n\n\n================================")
     val response =
       if (query.dataSource.contains("rollup") || query.dataSource.contains("distinct") || query.dataSource.contains("snapshot"))
         fc.getDruidRollUpClient().doQueryAsStream(query)
       else
         fc.getDruidClient().doQueryAsStream(query)
-
+    println(s"response = $response")
     val druidResult: Future[RDD[BaseResult]] = {
       response
         .via(new ResultAccumulator[BaseResult])
@@ -189,6 +204,7 @@ object DruidDataFetcher {
         })
         .toMat(Sink.fold[RDD[BaseResult], RDD[BaseResult]](sc.emptyRDD[BaseResult])(_ union _))(Keep.right).run()
     }
+    println(s"druidResult = $druidResult")
     val queryWaitTimeInMins = AppConf.getConfig("druid.query.wait.time.mins").toLong
     Await.result(druidResult, scala.concurrent.duration.Duration.apply(queryWaitTimeInMins, "minute"))
   }
