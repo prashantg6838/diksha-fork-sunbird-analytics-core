@@ -77,7 +77,6 @@ object DruidDataFetcher {
       .granularity(CommonUtil.getGranularity(query.granularity.getOrElse("all")))
       .interval(getIntervals(query))
     query.queryType.toLowerCase() match {
-      println(s"druidQuery = $druidQuery")
       case "groupby" =>
         val DQLQuery = druidQuery.agg(getAggregation(query.aggregations): _*)
           .groupBy(dims.map(f => getDimensionByType(f.`type`, f.fieldName, f.aliasName, f.outputType, f.extractionFn)): _*)
