@@ -176,6 +176,9 @@ object DruidDataFetcher {
   }
 
   import io.circe.syntax._
+  import akka.stream.scaladsl.Sink
+  import scala.concurrent.ExecutionContext.Implicits.global
+  import scala.util.{Success, Failure}
   def executeQueryAsStream(model: DruidQueryModel, query: DruidNativeQuery)(implicit sc: SparkContext, fc: FrameworkContext): RDD[BaseResult] = {
     println(s"-----------inside the executeQueryAsStream -------------")
     implicit val system = if (query.dataSource.contains("rollup") || query.dataSource.contains("distinct") || query.dataSource.contains("snapshot"))
@@ -194,6 +197,13 @@ object DruidDataFetcher {
       else
         fc.getDruidClient().doQueryAsStream(query)
     println(s"response = $response")
+    
+    val resultFuture = response.runWith(Sink.seq) 
+    resultFuture.onComplete {
+      case Success(result) => println(s"Query result: $result")
+      case Failure(ex) => println(s"Query failed with error: $ex")
+    }
+    
     val druidResult: Future[RDD[BaseResult]] = {
       response
         .via(new ResultAccumulator[BaseResult])
